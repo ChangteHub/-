@@ -30,3 +30,4 @@ back/uploads/
 # Reasonix
 .reasonix/
 reasonix.toml
+frontend/test-results/
