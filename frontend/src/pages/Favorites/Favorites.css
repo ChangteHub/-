@@ -1,0 +1,24 @@
+.favorites-page {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+.favorites-page .page-navbar {
+  --height: 48px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.favorites-content {
+  padding: 12px;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.favorites-empty {
+  margin-top: 80px;
+}

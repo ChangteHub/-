@@ -1,0 +1,6 @@
+export { default as AdminLayout } from './AdminLayout'
+export { default as Dashboard } from './Dashboard'
+export { default as UserManagement } from './UserManagement'
+export { default as ProductManagement } from './ProductManagement'
+export { default as VerificationReview } from './VerificationReview'
+export { default as CategoryManagement } from './CategoryManagement'

@@ -1,0 +1,37 @@
+.login-form {
+  padding: 8px 0;
+}
+
+.login-field {
+  margin-bottom: 16px;
+}
+
+.login-field label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.code-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.code-row .adm-input {
+  flex: 1;
+}
+
+.send-code-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.login-hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}

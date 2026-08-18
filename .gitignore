@@ -1,0 +1,32 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Maven
+back/target/
+*.jar
+*.war
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+back/startup.log
+
+# Uploads
+back/uploads/
+
+# Environment
+.env
+*.env.local
+
+# Reasonix
+.reasonix/
+reasonix.toml

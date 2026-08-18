@@ -1,0 +1,28 @@
+.my-publish-page {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+.my-publish-page .page-navbar {
+  --height: 48px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.my-publish-tabs {
+  background: var(--card-bg);
+}
+
+.my-publish-content {
+  padding: 12px;
+}
+
+.my-publish-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.my-publish-empty {
+  margin-top: 80px;
+}

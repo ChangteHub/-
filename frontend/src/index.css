@@ -1,0 +1,398 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Brand */
+  --primary: #1677ff;
+  --primary-hover: #4096ff;
+  --primary-active: #0958d9;
+  --primary-bg: #e6f4ff;
+  --accent: #ff7a00;
+  --accent-hover: #ff9a2e;
+  --accent-active: #d96800;
+
+  /* Surfaces */
+  --bg: #f5f6f8;
+  --card-bg: #ffffff;
+  --surface-elevated: #ffffff;
+
+  /* Text */
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a68;
+  --text-muted: #8e8ea0;
+
+  /* Borders */
+  --border: #e8e8f0;
+  --border-light: #f0f0f8;
+
+  /* Semantic */
+  --danger: #ff3b30;
+  --success: #34c759;
+
+  /* Category colors */
+  --cat-books: #4f6ef7;
+  --cat-digital: #10b981;
+  --cat-daily: #f59e0b;
+  --cat-clothing: #ec4899;
+  --cat-sports: #f97316;
+  --cat-beauty: #a855f7;
+  --cat-music: #06b6d4;
+  --cat-other: #6b7280;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-fab: 0 6px 20px rgba(255, 122, 0, 0.35);
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 980px;
+
+  /* Safe area */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body.dark-mode {
+  --bg: #1a1a1a;
+  --card-bg: #2d2d2d;
+  --surface-elevated: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+  --border: #3a3a3a;
+  --border-light: #2a2a2a;
+  --primary-bg: #1a2a3a;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .adm-input-element,
+body.dark-mode .adm-text-area-element {
+  color: var(--text-primary);
+  background: transparent;
+}
+
+body.dark-mode .adm-input,
+body.dark-mode .adm-text-area {
+  --color: var(--text-primary);
+  --placeholder-color: var(--text-muted);
+}
+
+body.dark-mode .adm-input-element::placeholder,
+body.dark-mode .adm-text-area-element::placeholder {
+  color: var(--text-muted);
+}
+
+body.dark-mode .adm-nav-bar {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  --adm-color-text: var(--text-primary);
+  border-bottom-color: var(--border);
+}
+
+body.dark-mode .adm-nav-bar-back-arrow {
+  color: var(--text-primary);
+}
+
+body.dark-mode .adm-button-default {
+  background-color: var(--card-bg);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+body.dark-mode .adm-picker-header {
+  background-color: var(--card-bg);
+  border-bottom-color: var(--border);
+}
+
+body.dark-mode .adm-picker-view {
+  background-color: var(--card-bg);
+}
+
+body.dark-mode .adm-picker-view-mask {
+  background: transparent;
+}
+
+body.dark-mode .adm-toast-main {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #1a1a1a;
+}
+
+body.dark-mode,
+body.dark-mode .app-container {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+body.dark-mode .page-wrapper {
+  background-color: var(--bg);
+}
+
+body.dark-mode .card,
+body.dark-mode .product-card,
+body.dark-mode .settings-list,
+body.dark-mode .verify-form {
+  background-color: var(--card-bg);
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app-container {
+  max-width: 480px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Focus-visible — keyboard users only */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Price tokens */
+.price {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.price-original {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.page-wrapper {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+/* Empty state */
+.empty-hint {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Hidden scrollbar */
+.app-content::-webkit-scrollbar {
+  display: none;
+}
+.app-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Motion tokens ─────────────────────────────────────────────── */
+:root {
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --motion-enter: 320ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Page transition */
+.app-content {
+  animation: page-enter var(--motion-enter) var(--ease-out) both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Scroll-reveal utilities ───────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--motion-enter) var(--ease-out),
+              transform var(--motion-enter) var(--ease-out);
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delays — assign via inline style or nth-child */
+.reveal-delay-1 { transition-delay: 50ms; }
+.reveal-delay-2 { transition-delay: 100ms; }
+.reveal-delay-3 { transition-delay: 150ms; }
+.reveal-delay-4 { transition-delay: 200ms; }
+.reveal-delay-5 { transition-delay: 250ms; }
+.reveal-delay-6 { transition-delay: 300ms; }
+.reveal-delay-7 { transition-delay: 350ms; }
+.reveal-delay-8 { transition-delay: 400ms; }
+
+/* Scale-in variant (for icons, FAB, small elements) */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity var(--motion-enter) var(--ease-out),
+              transform var(--motion-enter) var(--ease-spring);
+}
+
+.reveal-scale.in-view {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── Micro-interaction: heartbeat ──────────────────────────────── */
+@keyframes heartbeat {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.25); }
+  50%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.heartbeat {
+  animation: heartbeat 0.35s var(--ease-spring);
+}
+
+/* ─── Admin 后台深色模式 ─────────────────────────────── */
+body.dark-mode .admin-layout {
+  background: var(--bg);
+}
+
+body.dark-mode .admin-header {
+  background: var(--card-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .admin-header h2,
+body.dark-mode .admin-name {
+  color: var(--text-primary);
+}
+
+body.dark-mode .collapse-btn {
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+
+body.dark-mode .admin-content {
+  background: var(--bg);
+}
+
+body.dark-mode .page-title,
+body.dark-mode .dashboard-title,
+body.dark-mode .stat-title,
+body.dark-mode .product-title,
+body.dark-mode .modal-header h3 {
+  color: var(--text-primary);
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .data-table,
+body.dark-mode .modal-content,
+body.dark-mode .reject-form {
+  background: var(--card-bg);
+}
+
+body.dark-mode .stat-subtitle,
+body.dark-mode .page-info,
+body.dark-mode .product-meta,
+body.dark-mode .location,
+body.dark-mode .modal-body p {
+  color: var(--text-muted);
+}
+
+body.dark-mode .data-table th {
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  border-bottom-color: var(--border);
+}
+
+body.dark-mode .data-table td {
+  border-bottom-color: var(--border-light);
+  color: var(--text-secondary);
+}
+
+body.dark-mode .data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.dark-mode .toolbar input,
+body.dark-mode .toolbar select,
+body.dark-mode .reject-reason {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+body.dark-mode .toolbar input::placeholder {
+  color: var(--text-muted);
+}
+
+body.dark-mode .pagination button {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+body.dark-mode .pagination button:disabled {
+  color: var(--text-muted);
+}
+
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .modal-btn.btn-secondary {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* ─── Reduced motion ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal, .reveal-scale {
+    opacity: 1;
+    transform: none;
+  }
+}

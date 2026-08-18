@@ -1,0 +1,201 @@
+.detail-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--card-bg);
+}
+
+.detail-images {
+  position: relative;
+  height: 320px;
+  background: linear-gradient(135deg, #e8e8f0 0%, #f0f0f8 100%);
+}
+
+.detail-img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+.detail-back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.15s ease;
+}
+
+.detail-back:active {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.detail-body {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 80px;
+}
+
+.detail-price-section {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.detail-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+.detail-original-price {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.detail-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.45;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.detail-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.detail-desc {
+  margin-bottom: 16px;
+}
+
+.detail-desc h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.detail-desc p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.detail-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.detail-location .label {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.seller-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--bg);
+  border-radius: var(--radius-md);
+}
+
+.seller-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: var(--shadow-sm);
+}
+
+.seller-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.seller-nickname {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.seller-school {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* 底部操作栏 */
+.detail-footer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + var(--safe-bottom));
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.collect-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 12px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease;
+}
+
+.collect-btn svg {
+  font-size: 22px;
+}
+
+.collect-heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collect-btn:active {
+  opacity: 0.7;
+}
+
+.contact-btn {
+  flex: 1;
+}

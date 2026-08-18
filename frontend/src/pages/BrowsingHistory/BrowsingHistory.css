@@ -1,0 +1,35 @@
+.history-page {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+.history-page .page-navbar {
+  --height: 48px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.history-clear-btn {
+  font-size: 18px;
+  color: var(--text-muted);
+  padding: 4px;
+  cursor: pointer;
+}
+
+.history-clear-btn:hover {
+  color: var(--danger);
+}
+
+.history-content {
+  padding: 12px;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.history-empty {
+  margin-top: 80px;
+}

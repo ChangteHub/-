@@ -1,0 +1,117 @@
+.product-management {
+  max-width: 1200px;
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.cover-placeholder {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 24px;
+}
+
+.product-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-title {
+  font-size: 14px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.product-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #999;
+}
+
+.condition-tag {
+  background: #f0f0f0;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.price-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.current-price {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.original-price {
+  color: #999;
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+.seller-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.seller-id {
+  font-size: 12px;
+  color: #999;
+}
+
+.status-on-sale {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.status-sold {
+  background: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+}
+
+.status-off-shelf {
+  background: #f5f5f5;
+  color: #999;
+  border: 1px solid #d9d9d9;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-warning {
+  background: #fff7e6;
+  color: #faad14;
+  border: 1px solid #ffe58f;
+}
+
+.btn-warning:hover {
+  background: #faad14;
+  color: #fff;
+}
