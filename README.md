@@ -89,9 +89,11 @@ spring:
 
 | 变量 | 说明 |
 |------|------|
-| `JWT_SECRET` | JWT 签名密钥（无默认值，**缺失则启动失败**；生产环境务必使用强随机值） |
-| `DB_PASSWORD` | 数据库密码（可选，默认 115417，生产必须覆盖） |
+| `JWT_SECRET` | JWT 签名密钥（无默认值，**缺失或不足 32 字节则启动失败**；生产环境务必使用强随机值） |
+| `DB_PASSWORD` | 数据库密码（无默认值，**缺失则启动失败**；与 JWT 密钥同为 fail-fast 注入） |
 | `ADMIN_PASSWORD` | 管理员初始密码（可选，不设置则随机生成一次性密码并打印在启动日志） |
+
+可选环境变量：`DB_URL`、`DB_USERNAME`、`SERVER_PORT`、`UPLOAD_PATH`、`UPLOAD_URL_PREFIX`、`UPLOAD_MAX_FILE_SIZE`（默认 10MB）、`CORS_ALLOWED_ORIGINS`、`LOG_LEVEL`（默认 info，开发调试可设 debug）。
 
 ### 3. 建表与初始化
 
@@ -110,6 +112,7 @@ mysql -uroot -p xust_secondhand < back/src/main/resources/migration.sql
 ```bash
 cd back
 export JWT_SECRET=your-strong-secret
+export DB_PASSWORD=your-db-password
 mvn spring-boot:run
 ```
 

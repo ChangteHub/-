@@ -69,9 +69,9 @@ public class UploadController {
         }
 
         try {
-            // 检查文件头（Magic Number）
-            byte[] fileBytes = file.getBytes();
-            if (!isValidImageHeader(fileBytes)) {
+            // 检查文件头（Magic Number）——只读前 12 字节，避免大文件整体载入内存
+            byte[] header = file.getInputStream().readNBytes(12);
+            if (!isValidImageHeader(header)) {
                 return Result.badRequest("文件内容与扩展名不匹配");
             }
 
@@ -100,7 +100,9 @@ public class UploadController {
     }
 
     /**
-     * 验证图片文件头（Magic Number）
+     * 验证图片文件头（Magic Number）。
+     * WEBP 以 RIFF 容器开头，必须再校验偏移 8 字节的 "WEBP" 标识，
+     * 否则 AVI/WAV 等同为 RIFF 容器的文件会被放行
      */
     private boolean isValidImageHeader(byte[] bytes) {
         if (bytes == null || bytes.length < 4) {
@@ -122,8 +124,10 @@ public class UploadController {
             return true;
         }
 
-        // WEBP: 52 49 46 46
-        if (bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46) {
+        // WEBP: "RIFF" + 4字节长度 + "WEBP"（共需12字节）
+        if (bytes.length >= 12
+                && bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46
+                && bytes[8] == 0x57 && bytes[9] == 0x45 && bytes[10] == 0x42 && bytes[11] == 0x50) {
             return true;
         }
 

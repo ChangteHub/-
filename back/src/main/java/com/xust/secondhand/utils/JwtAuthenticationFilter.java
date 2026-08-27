@@ -1,6 +1,5 @@
 package com.xust.secondhand.utils;
 
-import com.xust.secondhand.common.BusinessException;
 import com.xust.secondhand.entity.User;
 import com.xust.secondhand.mapper.UserMapper;
 import jakarta.servlet.FilterChain;
@@ -37,17 +36,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            // 从请求头获取Token
+            // 仅从请求头获取Token（URL 查询参数传 token 会泄漏到访问日志/Referer，已移除；
+            // WebSocket 的 ?token= 由专用 HandshakeInterceptor 在握手阶段单独校验）
             String token = getTokenFromRequest(request);
 
             if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
                 // 解析用户信息（token仅作身份载体）
                 Long userId = jwtUtil.getUserIdFromToken(token);
 
-                // 校验用户仍存在且未被禁用/删除（防止封禁后旧Token继续有效）
+                // 校验用户仍存在且未被禁用/删除（防止封禁后旧Token继续有效）。
+                // 直接写 401 JSON 并终止请求，保留"账号已禁用"语义，不与普通未登录混淆
                 User user = userMapper.selectById(userId);
                 if (user == null || (user.getStatus() != null && user.getStatus() == 1)) {
-                    throw new BusinessException(401, "账号已禁用或不存在");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"code\":401,\"message\":\"账号已禁用或不存在\",\"data\":null}");
+                    return;
                 }
 
                 // 角色一律以数据库当前值为准（防止角色降级后旧Token仍持有管理员权限）
@@ -62,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (role == 1) {
                     authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"));
                 }
-                
+
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userId, null, authorities);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -90,7 +94,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        // 也支持从查询参数获取（WebSocket用）
-        return request.getParameter("token");
+        return null;
     }
 }

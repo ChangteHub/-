@@ -1,6 +1,7 @@
 package com.xust.secondhand.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xust.secondhand.common.BusinessException;
 import com.xust.secondhand.common.PageResult;
@@ -18,12 +19,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 管理员控制器
@@ -110,11 +113,26 @@ public class AdminController {
         wrapper.orderByDesc(User::getCreatedAt);
         
         Page<User> result = userMapper.selectPage(page, wrapper);
-        
+
+        // 一条 GROUP BY 批量统计各用户商品数，避免每行一次 COUNT（N+1）
+        List<Long> userIds = result.getRecords().stream().map(User::getId).toList();
+        QueryWrapper<Product> countWrapper = new QueryWrapper<>();
+        countWrapper.select("seller_id", "COUNT(*) AS cnt")
+                .in("seller_id", userIds)
+                .groupBy("seller_id");
+        Map<Long, Long> productCountMap = new HashMap<>();
+        for (Map<String, Object> row : productMapper.selectMaps(countWrapper)) {
+            Object sellerId = row.get("seller_id");
+            Object cnt = row.get("cnt");
+            if (sellerId != null && cnt != null) {
+                productCountMap.put(Long.valueOf(sellerId.toString()), ((Number) cnt).longValue());
+            }
+        }
+
         List<Map<String, Object>> list = result.getRecords().stream()
-                .map(this::convertToUserAdminVO)
+                .map(u -> convertToUserAdminVO(u, productCountMap.getOrDefault(u.getId(), 0L)))
                 .toList();
-        
+
         return Result.success(PageResult.of(result.getTotal(), pageNum, pageSize, list));
     }
 
@@ -125,7 +143,9 @@ public class AdminController {
         if (user == null) {
             throw BusinessException.notFound("用户不存在");
         }
-        return Result.success(convertToUserAdminVO(user));
+        LambdaQueryWrapper<Product> productWrapper = new LambdaQueryWrapper<>();
+        productWrapper.eq(Product::getSellerId, user.getId());
+        return Result.success(convertToUserAdminVO(user, productMapper.selectCount(productWrapper)));
     }
 
     @Operation(summary = "禁用/启用用户")
@@ -172,11 +192,25 @@ public class AdminController {
         wrapper.orderByDesc(Product::getCreatedAt);
         
         Page<Product> result = productMapper.selectPage(page, wrapper);
-        
+
+        // 批量查卖家与分类，避免每行两次查询（N+1）
+        List<Long> sellerIds = result.getRecords().stream()
+                .map(Product::getSellerId).filter(id -> id != null).distinct().toList();
+        Map<Long, User> sellerMap = sellerIds.isEmpty()
+                ? Map.of()
+                : userMapper.selectBatchIds(sellerIds).stream()
+                        .collect(Collectors.toMap(User::getId, u -> u));
+        List<Long> categoryIds = result.getRecords().stream()
+                .map(Product::getCategoryId).filter(id -> id != null).distinct().toList();
+        Map<Long, Category> categoryMap = categoryIds.isEmpty()
+                ? Map.of()
+                : categoryMapper.selectBatchIds(categoryIds).stream()
+                        .collect(Collectors.toMap(Category::getId, c -> c));
+
         List<Map<String, Object>> list = result.getRecords().stream()
-                .map(this::convertToProductAdminVO)
+                .map(p -> convertToProductAdminVO(p, sellerMap, categoryMap))
                 .toList();
-        
+
         return Result.success(PageResult.of(result.getTotal(), pageNum, pageSize, list));
     }
 
@@ -196,6 +230,7 @@ public class AdminController {
 
     @Operation(summary = "删除商品")
     @DeleteMapping("/products/{id}")
+    @Transactional
     public Result<Void> deleteProduct(@PathVariable Long id) {
         Product product = productMapper.selectById(id);
         if (product == null) {
@@ -228,11 +263,19 @@ public class AdminController {
         wrapper.orderByDesc(Verification::getCreatedAt);
         
         Page<Verification> result = verificationMapper.selectPage(page, wrapper);
-        
+
+        // 批量查认证提交用户，避免每行一次查询（N+1）
+        List<Long> userIds = result.getRecords().stream()
+                .map(Verification::getUserId).filter(id -> id != null).distinct().toList();
+        Map<Long, User> userMap = userIds.isEmpty()
+                ? Map.of()
+                : userMapper.selectBatchIds(userIds).stream()
+                        .collect(Collectors.toMap(User::getId, u -> u));
+
         List<Map<String, Object>> list = result.getRecords().stream()
-                .map(this::convertToVerificationAdminVO)
+                .map(v -> convertToVerificationAdminVO(v, userMap))
                 .toList();
-        
+
         return Result.success(PageResult.of(result.getTotal(), pageNum, pageSize, list));
     }
 
@@ -367,7 +410,7 @@ public class AdminController {
 
     // ==================== 转换方法 ====================
 
-    private Map<String, Object> convertToUserAdminVO(User user) {
+    private Map<String, Object> convertToUserAdminVO(User user, long productCount) {
         Map<String, Object> vo = new HashMap<>();
         vo.put("id", String.valueOf(user.getId()));
         vo.put("username", user.getUsername());
@@ -380,16 +423,11 @@ public class AdminController {
         vo.put("status", user.getStatus());
         vo.put("role", user.getRole());
         vo.put("createdAt", user.getCreatedAt());
-        
-        // 统计用户商品数
-        LambdaQueryWrapper<Product> productWrapper = new LambdaQueryWrapper<>();
-        productWrapper.eq(Product::getSellerId, user.getId());
-        vo.put("productCount", productMapper.selectCount(productWrapper));
-        
+        vo.put("productCount", productCount);
         return vo;
     }
 
-    private Map<String, Object> convertToProductAdminVO(Product product) {
+    private Map<String, Object> convertToProductAdminVO(Product product, Map<Long, User> sellerMap, Map<Long, Category> categoryMap) {
         Map<String, Object> vo = new HashMap<>();
         vo.put("id", String.valueOf(product.getId()));
         vo.put("title", product.getTitle());
@@ -401,24 +439,24 @@ public class AdminController {
         vo.put("status", product.getStatus());
         vo.put("viewCount", product.getViewCount());
         vo.put("createdAt", product.getCreatedAt());
-        
+
         // 获取卖家信息
-        User seller = userMapper.selectById(product.getSellerId());
+        User seller = sellerMap.get(product.getSellerId());
         if (seller != null) {
             vo.put("sellerName", seller.getNickname());
             vo.put("sellerUsername", seller.getUsername());
         }
-        
+
         // 获取分类信息
-        Category category = categoryMapper.selectById(product.getCategoryId());
+        Category category = categoryMap.get(product.getCategoryId());
         if (category != null) {
             vo.put("categoryName", category.getName());
         }
-        
+
         return vo;
     }
 
-    private Map<String, Object> convertToVerificationAdminVO(Verification verification) {
+    private Map<String, Object> convertToVerificationAdminVO(Verification verification, Map<Long, User> userMap) {
         Map<String, Object> vo = new HashMap<>();
         vo.put("id", String.valueOf(verification.getId()));
         vo.put("userId", String.valueOf(verification.getUserId()));
@@ -430,14 +468,14 @@ public class AdminController {
         vo.put("status", verification.getStatus());
         vo.put("rejectReason", verification.getRejectReason());
         vo.put("createdAt", verification.getCreatedAt());
-        
+
         // 获取用户信息
-        User user = userMapper.selectById(verification.getUserId());
+        User user = userMap.get(verification.getUserId());
         if (user != null) {
             vo.put("username", user.getUsername());
             vo.put("nickname", user.getNickname());
         }
-        
+
         return vo;
     }
 

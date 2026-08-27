@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +36,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    /** 登录防暴力破解：连续失败 N 次后锁定一段时间（内存态，重启即清空） */
+    private static final int MAX_LOGIN_FAILURES = 5;
+    private static final long LOGIN_LOCK_MILLIS = 15 * 60 * 1000L;
+    private static final Map<String, LoginFailure> LOGIN_FAILURES = new ConcurrentHashMap<>();
+
+    private record LoginFailure(int count, long lockUntil) {}
 
     private final UserMapper userMapper;
     private final ProductMapper productMapper;
@@ -83,19 +91,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginVO login(LoginDTO dto) {
+        String username = dto.getUsername();
+
+        // 防暴力破解：失败次数过多的账号临时锁定
+        LoginFailure failure = LOGIN_FAILURES.get(username);
+        long now = System.currentTimeMillis();
+        if (failure != null && failure.lockUntil() > now) {
+            long remainMin = (failure.lockUntil() - now) / 60000 + 1;
+            throw BusinessException.forbidden("密码错误次数过多，请约 " + remainMin + " 分钟后重试");
+        }
+
         // 查询用户
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(User::getUsername, dto.getUsername());
+        wrapper.eq(User::getUsername, username);
         User user = userMapper.selectOne(wrapper);
 
         if (user == null) {
+            recordLoginFailure(username);
             throw BusinessException.badRequest("用户名或密码错误");
         }
 
         // 验证密码
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            recordLoginFailure(username);
             throw BusinessException.badRequest("用户名或密码错误");
         }
+
+        // 登录成功，清除失败计数
+        LOGIN_FAILURES.remove(username);
 
         // 检查用户状态
         if (user.getStatus() == 1) {
@@ -106,6 +129,20 @@ public class UserServiceImpl implements UserService {
         String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
 
         return new LoginVO(token, convertToUserVO(user));
+    }
+
+    /**
+     * 记录一次登录失败；连续失败达上限则锁定
+     */
+    private void recordLoginFailure(String username) {
+        LOGIN_FAILURES.compute(username, (k, prev) -> {
+            int count = (prev == null || prev.lockUntil() > 0 && prev.lockUntil() < System.currentTimeMillis())
+                    ? 1 : prev.count() + 1;
+            if (count >= MAX_LOGIN_FAILURES) {
+                return new LoginFailure(count, System.currentTimeMillis() + LOGIN_LOCK_MILLIS);
+            }
+            return new LoginFailure(count, 0);
+        });
     }
 
     @Override
@@ -156,8 +193,11 @@ public class UserServiceImpl implements UserService {
 
         Page<Product> result = productMapper.selectPage(page, wrapper);
 
+        // 本列表所有商品卖家均为当前用户，只查一次即可
+        User seller = userMapper.selectById(userId);
+
         List<ProductListVO> list = result.getRecords().stream()
-                .map(this::convertToProductListVO)
+                .map(p -> convertToProductListVO(p, seller))
                 .collect(Collectors.toList());
 
         return PageResult.of(result.getTotal(), pageNum, pageSize, list);
@@ -190,10 +230,22 @@ public class UserServiceImpl implements UserService {
         // 按收藏顺序排序（因为IN查询不保序）
         Map<Long, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
+
+        // 批量查卖家信息，避免每个商品单独查询（N+1）
+        List<Long> sellerIds = products.stream()
+                .map(Product::getSellerId)
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, User> sellerMap = sellerIds.isEmpty()
+                ? Map.of()
+                : userMapper.selectBatchIds(sellerIds).stream()
+                        .collect(Collectors.toMap(User::getId, u -> u));
+
         List<ProductListVO> list = productIds.stream()
                 .map(productMap::get)
                 .filter(p -> p != null)
-                .map(this::convertToProductListVO)
+                .map(p -> convertToProductListVO(p, sellerMap.get(p.getSellerId())))
                 .collect(Collectors.toList());
 
         return PageResult.of(favResult.getTotal(), pageNum, pageSize, list);
@@ -218,9 +270,9 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 转换为ProductListVO
+     * 转换为ProductListVO（卖家信息由调用方批量传入，避免 N+1）
      */
-    private ProductListVO convertToProductListVO(Product product) {
+    private ProductListVO convertToProductListVO(Product product, User seller) {
         ProductListVO vo = new ProductListVO();
         vo.setId(product.getId());
         vo.setTitle(product.getTitle());
@@ -228,12 +280,11 @@ public class UserServiceImpl implements UserService {
         vo.setOriginalPrice(product.getOriginalPrice());
         vo.setCoverImage(product.getCoverImage());
         vo.setLocation(product.getLocation());
+        vo.setProductCondition(product.getProductCondition());
         vo.setStatus(product.getStatus());
         vo.setViewCount(product.getViewCount());
         vo.setCreatedAt(product.getCreatedAt());
 
-        // 获取卖家信息
-        User seller = userMapper.selectById(product.getSellerId());
         if (seller != null) {
             vo.setSellerName(seller.getNickname());
             vo.setSellerAvatar(seller.getAvatar());

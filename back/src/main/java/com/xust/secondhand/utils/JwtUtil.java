@@ -3,6 +3,7 @@ package com.xust.secondhand.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,17 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private long expiration;
+
+    /**
+     * 启动即校验密钥强度：HMAC-SHA256 要求至少 32 字节（256 位），
+     * 弱密钥在首次登录时才抛 WeakKeyException 会变成难排查的 500
+     */
+    @PostConstruct
+    public void checkSecretStrength() {
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT_SECRET 强度不足：至少需要 32 字节（256 位），请更换强随机密钥");
+        }
+    }
 
     /**
      * 获取签名密钥

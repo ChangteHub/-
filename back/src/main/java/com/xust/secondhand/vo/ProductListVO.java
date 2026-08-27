@@ -19,6 +19,8 @@ public class ProductListVO {
     private BigDecimal originalPrice;
     private String coverImage;
     private String location;
+    /** 商品成色（列表卡片角标展示用） */
+    private String productCondition;
     private Integer status;
     private Integer viewCount;
     private LocalDateTime createdAt;

@@ -1,6 +1,7 @@
 package com.xust.secondhand.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xust.secondhand.common.BusinessException;
@@ -18,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -119,9 +122,7 @@ public class ChatServiceImpl implements ChatService {
 
         List<ChatSession> sessions = sessionMapper.selectList(wrapper);
 
-        return sessions.stream()
-                .map(s -> convertToSessionVO(s, userId))
-                .collect(Collectors.toList());
+        return convertToSessionVOs(sessions, userId);
     }
 
     @Override
@@ -144,8 +145,14 @@ public class ChatServiceImpl implements ChatService {
 
         Page<ChatMessage> result = messageMapper.selectPage(page, wrapper);
 
+        // 批量取发送者信息，避免每条消息单独查询（N+1）
+        Map<Long, User> senderMap = batchGetUsers(result.getRecords().stream()
+                .map(ChatMessage::getSenderId)
+                .distinct()
+                .collect(Collectors.toList()));
+
         List<ChatMessageVO> list = result.getRecords().stream()
-                .map(this::convertToMessageVO)
+                .map(m -> convertToMessageVO(m, senderMap))
                 .collect(Collectors.toList());
 
         return PageResult.of(result.getTotal(), pageNum, pageSize, list);
@@ -184,7 +191,7 @@ public class ChatServiceImpl implements ChatService {
                      .set(ChatSession::getLastMessageTime, LocalDateTime.now());
         sessionMapper.update(null, updateWrapper);
 
-        return convertToMessageVO(message);
+        return convertToMessageVO(message, Map.of());
     }
 
     @Override
@@ -208,55 +215,106 @@ public class ChatServiceImpl implements ChatService {
     }
 
     /**
-     * 转换为会话VO
+     * 转换为会话VO（单个入口，复用批量转换）
      */
     private ChatSessionVO convertToSessionVO(ChatSession session, Long currentUserId) {
-        ChatSessionVO vo = new ChatSessionVO();
-        vo.setId(session.getId());
-        vo.setProductId(session.getProductId());
-        vo.setBuyerId(session.getBuyerId());
-        vo.setSellerId(session.getSellerId());
-        vo.setLastMessage(session.getLastMessage());
-        vo.setLastMessageTime(session.getLastMessageTime());
-
-        // 获取商品信息
-        Product product = productMapper.selectById(session.getProductId());
-        if (product != null) {
-            vo.setProductTitle(product.getTitle());
-            vo.setProductCoverImage(product.getCoverImage());
-        }
-
-        // 确定对方用户
-        Long otherUserId;
-        if (currentUserId.equals(session.getBuyerId())) {
-            otherUserId = session.getSellerId();
-        } else {
-            otherUserId = session.getBuyerId();
-        }
-        vo.setOtherUserId(otherUserId);
-
-        // 获取对方用户信息
-        User otherUser = userMapper.selectById(otherUserId);
-        if (otherUser != null) {
-            vo.setOtherUserName(otherUser.getNickname());
-            vo.setOtherUserAvatar(otherUser.getAvatar());
-        }
-
-        // 计算未读消息数
-        LambdaQueryWrapper<ChatMessage> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ChatMessage::getSessionId, session.getId())
-               .ne(ChatMessage::getSenderId, currentUserId)
-               .eq(ChatMessage::getIsRead, 0);
-        Long unreadCount = messageMapper.selectCount(wrapper);
-        vo.setUnreadCount(unreadCount.intValue());
-
-        return vo;
+        return convertToSessionVOs(List.of(session), currentUserId).get(0);
     }
 
     /**
-     * 转换为消息VO
+     * 批量转换为会话VO：商品、对方用户、未读数各一条批量查询，避免 3N+1
      */
-    private ChatMessageVO convertToMessageVO(ChatMessage message) {
+    private List<ChatSessionVO> convertToSessionVOs(List<ChatSession> sessions, Long currentUserId) {
+        if (sessions.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量查商品
+        List<Long> productIds = sessions.stream()
+                .map(ChatSession::getProductId)
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, Product> productMap = productIds.isEmpty()
+                ? Map.of()
+                : productMapper.selectBatchIds(productIds).stream()
+                        .collect(Collectors.toMap(Product::getId, p -> p));
+
+        // 批量查对方用户
+        List<Long> otherUserIds = sessions.stream()
+                .map(s -> currentUserId.equals(s.getBuyerId()) ? s.getSellerId() : s.getBuyerId())
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, User> otherUserMap = batchGetUsers(otherUserIds);
+
+        // 一条 GROUP BY 查询批量算各会话未读数
+        List<Long> sessionIds = sessions.stream()
+                .map(ChatSession::getId)
+                .collect(Collectors.toList());
+        QueryWrapper<ChatMessage> unreadWrapper = new QueryWrapper<>();
+        unreadWrapper.select("session_id", "COUNT(*) AS cnt")
+                .in("session_id", sessionIds)
+                .ne("sender_id", currentUserId)
+                .eq("is_read", 0)
+                .groupBy("session_id");
+        Map<Long, Integer> unreadMap = new HashMap<>();
+        for (Map<String, Object> row : messageMapper.selectMaps(unreadWrapper)) {
+            Object sessionId = row.get("session_id");
+            Object cnt = row.get("cnt");
+            if (sessionId != null && cnt != null) {
+                unreadMap.put(Long.valueOf(sessionId.toString()), ((Number) cnt).intValue());
+            }
+        }
+
+        return sessions.stream()
+                .map(session -> {
+                    ChatSessionVO vo = new ChatSessionVO();
+                    vo.setId(session.getId());
+                    vo.setProductId(session.getProductId());
+                    vo.setBuyerId(session.getBuyerId());
+                    vo.setSellerId(session.getSellerId());
+                    vo.setLastMessage(session.getLastMessage());
+                    vo.setLastMessageTime(session.getLastMessageTime());
+
+                    Product product = productMap.get(session.getProductId());
+                    if (product != null) {
+                        vo.setProductTitle(product.getTitle());
+                        vo.setProductCoverImage(product.getCoverImage());
+                    }
+
+                    Long otherUserId = currentUserId.equals(session.getBuyerId())
+                            ? session.getSellerId()
+                            : session.getBuyerId();
+                    vo.setOtherUserId(otherUserId);
+
+                    User otherUser = otherUserMap.get(otherUserId);
+                    if (otherUser != null) {
+                        vo.setOtherUserName(otherUser.getNickname());
+                        vo.setOtherUserAvatar(otherUser.getAvatar());
+                    }
+
+                    vo.setUnreadCount(unreadMap.getOrDefault(session.getId(), 0));
+                    return vo;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 批量查询用户（空列表直接返回空 Map）
+     */
+    private Map<Long, User> batchGetUsers(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+        return userMapper.selectBatchIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+    }
+
+    /**
+     * 转换为消息VO（发送者信息由调用方批量传入，避免 N+1）
+     */
+    private ChatMessageVO convertToMessageVO(ChatMessage message, Map<Long, User> senderMap) {
         ChatMessageVO vo = new ChatMessageVO();
         vo.setId(message.getId());
         vo.setSessionId(message.getSessionId());
@@ -267,7 +325,10 @@ public class ChatServiceImpl implements ChatService {
         vo.setCreatedAt(message.getCreatedAt());
 
         // 获取发送者信息
-        User sender = userMapper.selectById(message.getSenderId());
+        User sender = senderMap.get(message.getSenderId());
+        if (sender == null) {
+            sender = userMapper.selectById(message.getSenderId());
+        }
         if (sender != null) {
             vo.setSenderName(sender.getNickname());
             vo.setSenderAvatar(sender.getAvatar());

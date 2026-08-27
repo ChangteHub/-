@@ -63,8 +63,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/banners", "/api/help", "/api/search/**").permitAll()
                 // 文件上传（需要认证）
                 .requestMatchers("/api/upload/**").authenticated()
-                // 静态资源
-                .requestMatchers("/uploads/**", "/avatars/**", "/products/**", "/icons/**").permitAll()
+                // 静态资源（与 WebConfig 的 /uploads/** 映射对应；其余静态资源由 Nginx 直接服务，不经后端）
+                .requestMatchers("/uploads/**").permitAll()
                 // Swagger/Knife4j
                 .requestMatchers("/doc.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/favicon.ico").permitAll()
                 // WebSocket

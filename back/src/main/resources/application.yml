@@ -6,11 +6,19 @@ spring:
     name: xust-secondhand
 
   # 数据源配置
+  # 安全要求：数据库口令无默认值（缺失则启动失败），必须通过环境变量 DB_PASSWORD 注入
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/xust_secondhand?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:115417}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 文件上传大小限制（与 UploadController 的 10MB 自校验保持一致；
+  # 不配置时 Spring Boot 默认仅 1MB，会导致 1~10MB 的图片在进入控制器前被拒并返回 500）
+  servlet:
+    multipart:
+      max-file-size: ${UPLOAD_MAX_FILE_SIZE:10MB}
+      max-request-size: ${UPLOAD_MAX_REQUEST_SIZE:10MB}
 
   # SQL初始化 - 改为never避免每次启动重置数据
   sql:
@@ -23,7 +31,8 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 走 Slf4j（由下方 LOG_LEVEL 控制），避免 StdOutImpl 在生产环境无条件打印 SQL 与参数明文
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   global-config:
     db-config:
       logic-delete-field: deleted
@@ -64,4 +73,5 @@ app:
 
 logging:
   level:
-    com.xust.secondhand: ${LOG_LEVEL:debug}
+    # 默认 info：debug 会打印大量框架日志；开发调试时可通过 LOG_LEVEL=debug 覆盖
+    com.xust.secondhand: ${LOG_LEVEL:info}

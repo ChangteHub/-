@@ -1,6 +1,7 @@
 package com.xust.secondhand.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import java.time.LocalDateTime;
 
@@ -17,7 +18,8 @@ public class User {
     /** 用户名/学号 */
     private String username;
 
-    /** 密码(BCrypt加密) */
+    /** 密码(BCrypt加密)。禁止序列化到任何响应，防止哈希意外泄漏 */
+    @JsonIgnore
     private String password;
 
     /** 昵称 */

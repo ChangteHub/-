@@ -7,13 +7,12 @@ import com.xust.secondhand.entity.User;
 import com.xust.secondhand.mapper.ChatSessionMapper;
 import com.xust.secondhand.mapper.UserMapper;
 import com.xust.secondhand.service.ChatService;
-import com.xust.secondhand.utils.JwtUtil;
 import com.xust.secondhand.vo.ChatMessageVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,17 +26,21 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
 
-    private final JwtUtil jwtUtil;
+    /** 单连接发送缓冲区 512KB；超时 5s，防止慢连接拖垮发送线程 */
+    private static final int SEND_TIME_LIMIT_MS = 5000;
+    private static final int SEND_BUFFER_SIZE_LIMIT = 512 * 1024;
+
     private final ChatService chatService;
     private final ChatSessionMapper sessionMapper;
     private final UserMapper userMapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /** 在线用户会话映射: userId -> 该用户的所有WebSocket连接（支持多标签页/多端） */
+    /** 在线用户会话映射: userId -> 该用户的所有WebSocket连接（支持多标签页/多端）。
+     *  连接均以 ConcurrentWebSocketSessionDecorator 包装：发送自带锁与缓冲区，
+     *  避免与接收者自身线程并发写同一 session 抛 TEXT_FULL_WRITING */
     private static final Map<Long, Set<WebSocketSession>> ONLINE_USERS = new ConcurrentHashMap<>();
 
-    public ChatWebSocketHandler(JwtUtil jwtUtil, ChatService chatService, ChatSessionMapper sessionMapper, UserMapper userMapper) {
-        this.jwtUtil = jwtUtil;
+    public ChatWebSocketHandler(ChatService chatService, ChatSessionMapper sessionMapper, UserMapper userMapper) {
         this.chatService = chatService;
         this.sessionMapper = sessionMapper;
         this.userMapper = userMapper;
@@ -45,14 +48,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        // 从URL参数获取token
-        String token = getTokenFromSession(session);
-        if (token == null || !jwtUtil.validateToken(token)) {
+        // 身份由 WebSocketAuthInterceptor 在握手阶段校验并写入 attributes
+        Long userId = (Long) session.getAttributes().get("userId");
+        if (userId == null) {
             session.close(CloseStatus.NOT_ACCEPTABLE);
             return;
         }
-
-        Long userId = jwtUtil.getUserIdFromToken(token);
 
         // 与HTTP侧对齐：校验用户仍存在且未被禁用/删除
         User user = userMapper.selectById(userId);
@@ -61,12 +62,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        session.getAttributes().put("userId", userId);
-
-        // 添加到在线用户列表（同一用户多标签页/多端连接共存）
+        // 包装后加入在线列表（同一用户多标签页/多端连接共存）
+        WebSocketSession safeSession = new ConcurrentWebSocketSessionDecorator(
+                session, SEND_TIME_LIMIT_MS, SEND_BUFFER_SIZE_LIMIT);
         Set<WebSocketSession> userSessions =
                 ONLINE_USERS.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet());
-        userSessions.add(session);
+        userSessions.add(safeSession);
         log.info("用户 {} 已连接WebSocket，当前连接数 {}", userId, userSessions.size());
 
         // 标记该用户的所有未读消息为已读
@@ -103,8 +104,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             }
 
             // 确定接收者ID
-            Long receiverId = senderId.equals(chatSession.getBuyerId()) 
-                    ? chatSession.getSellerId() 
+            Long receiverId = senderId.equals(chatSession.getBuyerId())
+                    ? chatSession.getSellerId()
                     : chatSession.getBuyerId();
 
             // 构建推送消息
@@ -144,36 +145,21 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     /**
-     * 从在线用户映射中移除指定连接（仅移除当前session，不影响其他标签页）
+     * 从在线用户映射中移除指定连接（仅移除当前session，不影响其他标签页）。
+     * 在线列表存的是包装后的 session，需解包后按原始 session 匹配
      */
-    private void removeSession(Long userId, WebSocketSession session) {
+    private void removeSession(Long userId, WebSocketSession rawSession) {
         ONLINE_USERS.computeIfPresent(userId, (uid, sessions) -> {
-            sessions.remove(session);
+            sessions.removeIf(s -> unwrap(s) == rawSession);
             return sessions.isEmpty() ? null : sessions;
         });
     }
 
-    /**
-     * 从WebSocket session中获取token
-     */
-    private String getTokenFromSession(WebSocketSession session) {
-        String query = session.getUri() != null ? session.getUri().getQuery() : null;
-        if (query != null) {
-            Map<String, String> params = UriComponentsBuilder
-                    .fromUriString("?" + query)
-                    .build()
-                    .getQueryParams()
-                    .toSingleValueMap();
-            return params.get("token");
+    private WebSocketSession unwrap(WebSocketSession session) {
+        WebSocketSession cur = session;
+        while (cur instanceof org.springframework.web.socket.handler.WebSocketSessionDecorator decorator) {
+            cur = decorator.getDelegate();
         }
-        return null;
-    }
-
-    /**
-     * 检查用户是否在线
-     */
-    public boolean isOnline(Long userId) {
-        Set<WebSocketSession> sessions = ONLINE_USERS.get(userId);
-        return sessions != null && sessions.stream().anyMatch(WebSocketSession::isOpen);
+        return cur;
     }
 }
