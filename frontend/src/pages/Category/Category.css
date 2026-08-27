@@ -5,15 +5,16 @@
 }
 
 .category-header {
-  padding: 14px 16px;
+  padding: 16px 16px 12px;
   background: var(--card-bg);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .category-header h1 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .category-body {
@@ -23,11 +24,15 @@
 }
 
 .category-sidebar {
-  width: 88px;
+  width: 92px;
   flex-shrink: 0;
   background: var(--bg);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .sidebar-item {
@@ -35,12 +40,12 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 14px 8px;
+  padding: 12px 4px;
   font-size: 12px;
   color: var(--text-secondary);
   cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: all 0.15s ease;
+  border-radius: var(--radius-md);
+  transition: background 0.15s ease, color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -51,21 +56,32 @@
 .sidebar-item.active {
   background: var(--card-bg);
   color: var(--primary);
-  border-left-color: var(--primary);
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-item.active .sidebar-icon {
+  transform: scale(1.1);
 }
 
 .sidebar-icon {
-  font-size: 18px;
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.2s var(--ease-spring);
 }
 
 .category-grid {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   align-content: start;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* 空状态占满整行 */
+.category-empty {
+  grid-column: 1 / -1;
 }

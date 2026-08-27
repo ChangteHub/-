@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Modal, Input, Button, Toast } from 'antd-mobile'
+import { EyeOutline, EyeInvisibleOutline } from 'antd-mobile-icons'
 import { useStore } from '../store/useStore'
 import { authApi } from '../services/api'
 import './LoginModal.css'
@@ -11,6 +12,7 @@ export default function LoginModal() {
   const [isRegister, setIsRegister] = useState(false)
   const [nickname, setNickname] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPwd, setShowPwd] = useState(false)
 
   const handleLogin = async () => {
     if (!username.trim()) {
@@ -67,21 +69,37 @@ export default function LoginModal() {
     setUsername('')
     setPassword('')
     setNickname('')
+    setShowPwd(false)
+  }
+
+  const handleClose = () => {
+    hideLogin()
+    setIsRegister(false)
+    resetForm()
   }
 
   return (
     <Modal
       visible={loginVisible}
-      onClose={hideLogin}
-      title={isRegister ? '注册' : '登录'}
+      onClose={handleClose}
+      showCloseButton
+      bodyStyle={{ borderRadius: 'var(--radius-xl)' }}
       content={
         <div className="login-form">
+          {/* 品牌标识 */}
+          <div className="login-brand" aria-hidden="true">
+            <span className="login-logo">校园</span>
+            <h2 className="login-title">{isRegister ? '创建账号' : '欢迎回来'}</h2>
+            <p className="login-subtitle">{isRegister ? '加入校园二手交易' : '登录后开始淘好物'}</p>
+          </div>
+
           <div className="login-field">
             <label>用户名</label>
             <Input
               placeholder="请输入用户名/学号"
               value={username}
               onChange={setUsername}
+              clearable
             />
           </div>
 
@@ -92,29 +110,40 @@ export default function LoginModal() {
                 placeholder="请输入昵称"
                 value={nickname}
                 onChange={setNickname}
+                clearable
               />
             </div>
           )}
 
           <div className="login-field">
             <label>密码</label>
-            <Input
-              placeholder="请输入密码"
-              value={password}
-              onChange={setPassword}
-              type="password"
-              onEnterPress={isRegister ? handleRegister : handleLogin}
-            />
+            <div className="login-password">
+              <Input
+                placeholder="请输入密码"
+                value={password}
+                onChange={setPassword}
+                type={showPwd ? 'text' : 'password'}
+                onEnterPress={isRegister ? handleRegister : handleLogin}
+              />
+              <button
+                type="button"
+                className="pwd-toggle"
+                onClick={() => setShowPwd((v) => !v)}
+                aria-label={showPwd ? '隐藏密码' : '显示密码'}
+              >
+                {showPwd ? <EyeOutline /> : <EyeInvisibleOutline />}
+              </button>
+            </div>
           </div>
 
           <Button
             block
-            color="primary"
             size="large"
+            className="login-submit"
             onClick={isRegister ? handleRegister : handleLogin}
             loading={loading}
           >
-            {isRegister ? '注册' : '登录'}
+            {isRegister ? '注册并登录' : '登录'}
           </Button>
 
           <div className="login-switch">

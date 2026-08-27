@@ -151,7 +151,7 @@ export default function PublishPage() {
           <div className="image-grid">
             {images.map((img, i) => (
               <div key={i} className="image-thumb">
-                <Image src={img} width={72} height={72} fit="cover" style={{ borderRadius: 6 }} />
+                <Image src={img} width={72} height={72} fit="cover" style={{ borderRadius: 10 }} />
                 <button className="remove-img" onClick={() => removeImage(i)} aria-label={`删除图片${i + 1}`}>
                   <CloseOutline />
                 </button>

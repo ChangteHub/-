@@ -2,16 +2,17 @@
   padding-bottom: 20px;
 }
 
-/* 顶部搜索栏 */
+/* 顶部搜索栏 — 品牌渐变 + 底部圆角过渡 */
 .home-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: var(--primary);
+  padding: 12px 16px 14px;
+  background: var(--primary-gradient);
   position: sticky;
   top: 0;
   z-index: 100;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .search-bar {
@@ -19,8 +20,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 14px;
+  height: 38px;
+  padding: 0 16px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: var(--radius-full);
   color: var(--text-muted);
@@ -28,6 +29,11 @@
   cursor: pointer;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  transition: box-shadow var(--motion-fast) ease;
+}
+
+.search-bar:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .header-icon {
@@ -41,6 +47,18 @@
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
   position: relative;
+}
+
+/* 未读红点 */
+.header-icon-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 1.5px solid #fff;
 }
 
 /* Banner */
@@ -146,6 +164,22 @@
   color: var(--text-muted);
   font-size: 13px;
   cursor: pointer;
+  letter-spacing: 0.03em;
+}
+
+.load-more .load-retry {
+  display: inline-block;
+  padding: 6px 18px;
+  border-radius: var(--radius-full);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-secondary);
+  transition: color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+
+.load-more .load-retry:hover {
+  color: var(--primary);
+  box-shadow: var(--shadow-md);
 }
 
 /* 悬浮发布按钮 */
@@ -153,10 +187,10 @@
   position: fixed;
   bottom: 80px;
   right: calc(50% - 220px);
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-gradient);
   color: #fff;
   font-size: 28px;
   font-weight: 300;

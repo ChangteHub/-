@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Badge } from 'antd-mobile'
 import { chatApi } from '../../services/api'
 import { useStore } from '../../store/useStore'
+import { formatChatTime, avatarFallback, DEFAULT_AVATAR } from '../../utils/format'
 import type { ChatSessionVO } from '../../types'
 import './Chat.css'
 
@@ -56,7 +57,12 @@ export default function ChatPage() {
               onClick={() => navigate(`/chat/${conv.id}`)}
             >
               <div className="conv-avatar-wrap">
-                <img src={conv.otherUserAvatar} alt="" className="conv-avatar" />
+                <img
+                  src={conv.otherUserAvatar || DEFAULT_AVATAR}
+                  alt=""
+                  className="conv-avatar"
+                  onError={avatarFallback}
+                />
                 {conv.unreadCount > 0 && (
                   <Badge content={conv.unreadCount} className="conv-badge" />
                 )}
@@ -64,7 +70,7 @@ export default function ChatPage() {
               <div className="conv-body">
                 <div className="conv-top">
                   <span className="conv-name">{conv.otherUserName}</span>
-                  <span className="conv-time">{conv.lastMessageTime ? new Date(conv.lastMessageTime).toLocaleString() : ''}</span>
+                  <span className="conv-time">{formatChatTime(conv.lastMessageTime)}</span>
                 </div>
                 <div className="conv-bottom">
                   <span className="conv-msg">{conv.lastMessage}</span>

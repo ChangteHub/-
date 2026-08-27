@@ -101,11 +101,17 @@ export default function CategoryPage() {
         {/* 右侧商品网格 */}
         <main className="category-grid">
           {loading ? (
-            <div className="empty-hint">加载中...</div>
+            Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className="skeleton skeleton-card" style={{ borderRadius: 'var(--radius-lg)' }}>
+                <div className="skeleton-img" />
+                <div className="skeleton-line" style={{ width: `${85 - (i % 2) * 18}%` }} />
+                <div className="skeleton-line short" />
+              </div>
+            ))
           ) : products.length > 0 ? (
             products.map((p) => <ProductCard key={p.id} product={p} />)
           ) : (
-            <div className="empty-hint">该分类暂无商品</div>
+            <div className="empty-hint category-empty">该分类暂无商品，去别的分类看看吧</div>
           )}
         </main>
       </div>

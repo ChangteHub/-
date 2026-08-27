@@ -14,6 +14,7 @@ import {
 import { useStore } from '../../store/useStore'
 import { productApi } from '../../services/api'
 import ProductCard from '../../components/ProductCard'
+import { avatarFallback, DEFAULT_AVATAR } from '../../utils/format'
 import type { Product } from '../../types'
 import './Profile.css'
 
@@ -82,7 +83,12 @@ export default function ProfilePage() {
         <div className="profile-user">
           {user ? (
             <>
-              <img src={user.avatar} alt={user.nickname} className="profile-avatar" />
+              <img
+                src={user.avatar || DEFAULT_AVATAR}
+                alt={user.nickname}
+                className="profile-avatar"
+                onError={avatarFallback}
+              />
               <div className="profile-info">
                 <span className="profile-name">{user.nickname}</span>
                 <span className="profile-school">{user.school}</span>

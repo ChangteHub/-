@@ -171,6 +171,7 @@ export default function HomePage() {
           aria-label="消息通知"
         >
           <BellOutline fontSize={22} />
+          <span className="header-icon-dot" aria-hidden="true" />
         </button>
       </header>
 
@@ -188,32 +189,60 @@ export default function HomePage() {
         </Swiper>
       </section>
 
-      {/* 分类入口 */}
-      <section className="home-categories" data-od-id="home-categories" aria-label="商品分类">
-        <Grid columns={4} gap={8}>
-          {categories.map((cat, i) => (
-            <Grid.Item key={cat.id}>
-              <RevealCategory
-                cat={cat}
-                index={i}
-                icon={iconMap[cat.icon]}
-                onClick={() => navigate(`/category?cat=${cat.id}`)}
-              />
-            </Grid.Item>
-          ))}
-        </Grid>
-      </section>
+      {/* 分类入口（分类未加载到时隐藏，避免空白卡片） */}
+      {categories.length > 0 && (
+        <section className="home-categories" data-od-id="home-categories" aria-label="商品分类">
+          <Grid columns={4} gap={8}>
+            {categories.map((cat, i) => (
+              <Grid.Item key={cat.id}>
+                <RevealCategory
+                  cat={cat}
+                  index={i}
+                  icon={iconMap[cat.icon]}
+                  onClick={() => navigate(`/category?cat=${cat.id}`)}
+                />
+              </Grid.Item>
+            ))}
+          </Grid>
+        </section>
+      )}
 
       {/* 商品瀑布流 */}
       <section className="home-products" data-od-id="home-products" aria-label="商品列表">
-        <div className="waterfall">
-          {products.map((p, i) => (
-            <RevealCard key={p.id} product={p} index={i} />
-          ))}
-        </div>
-        <div className="load-more" onClick={loadError ? () => loadProducts() : loadMore}>
-          {loading ? <DotLoading color="primary" /> : loadError ? '加载失败，点击重试' : total === 0 && products.length === 0 ? '暂无商品' : page * PAGE_SIZE >= total && total > 0 ? '没有更多了' : '上拉加载更多'}
-        </div>
+        {loading && products.length === 0 ? (
+          <div className="waterfall">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="skeleton skeleton-card" style={{ borderRadius: 'var(--radius-lg)' }}>
+                <div className="skeleton-img" />
+                <div className="skeleton-line" style={{ width: `${88 - (i % 3) * 14}%` }} />
+                <div className="skeleton-line short" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="waterfall">
+            {products.map((p, i) => (
+              <RevealCard key={p.id} product={p} index={i} />
+            ))}
+          </div>
+        )}
+        {products.length > 0 || loading ? (
+          <div className={`load-more${loadError ? ' load-error' : ''}`} onClick={loadError ? () => loadProducts() : loadMore}>
+            {loading ? (
+              <DotLoading color="primary" />
+            ) : loadError ? (
+              <span className="load-retry">加载失败，点击重试</span>
+            ) : total === 0 && products.length === 0 ? (
+              '暂无商品'
+            ) : page * PAGE_SIZE >= total && total > 0 ? (
+              '— 没有更多了 —'
+            ) : (
+              '上拉加载更多'
+            )}
+          </div>
+        ) : (
+          !loading && products.length === 0 && <div className="empty-hint">还没有人发布商品，快来抢沙发</div>
+        )}
       </section>
 
       {/* 悬浮发布按钮 */}

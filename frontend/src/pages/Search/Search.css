@@ -54,6 +54,13 @@
 .section-header h3 {
   font-size: 15px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hot-flame {
+  font-size: 15px;
 }
 
 .section-header button {
@@ -86,6 +93,26 @@
 
 .history-tag:active {
   background: var(--border-light);
+}
+
+/* 热搜排名角标 */
+.hot-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  border-radius: 5px;
+  background: var(--border-light);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.hot-rank-top {
+  background: var(--accent-gradient);
+  color: #fff;
 }
 
 /* 排序栏 */
@@ -131,6 +158,10 @@
 /* 结果网格 */
 .search-results {
   min-height: 300px;
+}
+
+.result-empty {
+  grid-column: 1 / -1;
 }
 
 .result-grid {

@@ -4,7 +4,7 @@ import { Swiper, Button, Tag, Toast } from 'antd-mobile'
 import { HeartOutline, HeartFill, LeftOutline } from 'antd-mobile-icons'
 import { productApi, favoriteApi, chatApi } from '../../services/api'
 import { useStore } from '../../store/useStore'
-import { DEFAULT_AVATAR } from '../../utils/format'
+import { DEFAULT_AVATAR, avatarFallback } from '../../utils/format'
 import type { ProductVO } from '../../types'
 import './ProductDetail.css'
 
@@ -142,7 +142,10 @@ export default function ProductDetailPage() {
       <div className="detail-body">
         {/* 价格区 */}
         <div className="detail-price-section">
-          <span className="detail-price">¥{product.price}</span>
+          <span className="detail-price">
+            <span className="price-symbol">¥</span>
+            {product.price}
+          </span>
           {product.originalPrice && (
             <span className="detail-original-price">原价 ¥{product.originalPrice}</span>
           )}
@@ -175,7 +178,12 @@ export default function ProductDetailPage() {
 
         {/* 卖家信息 */}
         <div className="seller-card" data-od-id="seller-card">
-          <img src={product.sellerAvatar || DEFAULT_AVATAR} alt={product.sellerName || '卖家'} className="seller-avatar" />
+          <img
+            src={product.sellerAvatar || DEFAULT_AVATAR}
+            alt={product.sellerName || '卖家'}
+            className="seller-avatar"
+            onError={avatarFallback}
+          />
           <div className="seller-info">
             <span className="seller-nickname">{product.sellerName || '匿名用户'}</span>
             <span className="seller-school">{product.sellerSchool || '西南科技大学'}</span>

@@ -150,18 +150,22 @@ export default function SearchPage() {
           {hotSearches.length > 0 && (
             <div className="search-section">
               <div className="section-header">
-                <h3>热门搜索</h3>
+                <h3>
+                  <span className="hot-flame" aria-hidden="true">🔥</span>热门搜索
+                </h3>
               </div>
               <div className="tag-list">
-                {hotSearches.map((h) => (
+                {hotSearches.map((h, i) => (
                   <Tag
                     key={h}
                     round
-                    color="default"
+                    color="primary"
                     fill="outline"
                     onClick={() => doSearch(h)}
                     style={{ cursor: 'pointer' }}
                   >
+                    {i < 3 && <span className="hot-rank hot-rank-top">{i + 1}</span>}
+                    {i >= 3 && <span className="hot-rank">{i + 1}</span>}
                     {h}
                   </Tag>
                 ))}
@@ -190,13 +194,19 @@ export default function SearchPage() {
           {/* 结果列表 */}
           <div className="result-grid">
             {loading ? (
-              <div className="empty-hint">搜索中...</div>
+              Array.from({ length: 4 }, (_, i) => (
+                <div key={i} className="skeleton skeleton-card" style={{ borderRadius: 'var(--radius-lg)' }}>
+                  <div className="skeleton-img" />
+                  <div className="skeleton-line" style={{ width: `${85 - (i % 2) * 18}%` }} />
+                  <div className="skeleton-line short" />
+                </div>
+              ))
             ) : results.length > 0 ? (
               results.map((p, i) => (
                 <RevealResult key={p.id} product={p} index={i} />
               ))
             ) : (
-              <div className="empty-hint">没有找到相关商品</div>
+              <div className="empty-hint result-empty">没有找到相关商品，换个关键词试试</div>
             )}
           </div>
         </div>

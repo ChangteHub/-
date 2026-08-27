@@ -4,7 +4,7 @@ import { Input, Button, Image, Toast } from 'antd-mobile'
 import { LeftOutline } from 'antd-mobile-icons'
 import { chatApi } from '../../services/api'
 import { useStore } from '../../store/useStore'
-import { DEFAULT_AVATAR } from '../../utils/format'
+import { DEFAULT_AVATAR, avatarFallback } from '../../utils/format'
 import type { ChatMessageVO, ChatSessionVO } from '../../types'
 import './ChatDetail.css'
 
@@ -189,6 +189,7 @@ export default function ChatDetailPage() {
                     src={msg.senderAvatar || DEFAULT_AVATAR}
                     alt=""
                     className="msg-avatar"
+                    onError={avatarFallback}
                   />
                 )}
                 <div className={`message-bubble ${isMe ? 'bubble-me' : 'bubble-other'}`}>
@@ -207,6 +208,7 @@ export default function ChatDetailPage() {
                     src={user?.avatar || DEFAULT_AVATAR}
                     alt=""
                     className="msg-avatar"
+                    onError={avatarFallback}
                   />
                 )}
               </div>
@@ -224,7 +226,7 @@ export default function ChatDetailPage() {
           className="chat-input"
           onEnterPress={send}
         />
-        <Button color="primary" size="small" onClick={send}>
+        <Button color="primary" size="small" className="send-btn" onClick={send}>
           发送
         </Button>
       </div>
