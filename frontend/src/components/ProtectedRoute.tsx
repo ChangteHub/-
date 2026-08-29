@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore } from '../store/useStore'
+import { useStore } from '../stores/useStore'
 
 interface ProtectedRouteProps {
   children: React.ReactNode

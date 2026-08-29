@@ -1,0 +1,61 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: xust-secondhand
+  # 默认 dev；生产环境由 SPRING_PROFILES_ACTIVE=prod 覆盖
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  servlet:
+    multipart:
+      max-file-size: ${UPLOAD_MAX_FILE_SIZE:10MB}
+      max-request-size: ${UPLOAD_MAX_REQUEST_SIZE:10MB}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    # 走 Slf4j（由 LOG_LEVEL 控制），避免 StdOutImpl 在生产环境无条件打印 SQL 与参数明文
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+
+# JWT 公共配置（secret 属敏感信息，分环境注入：dev 有占位默认值，prod 必须显式注入）
+jwt:
+  expiration: ${JWT_EXPIRATION:86400000}  # 24小时
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: default
+      display-name: 校园二手交易平台API
+      paths-to-match: /**
+      packages-to-scan: com.xust.secondhand.controller
+
+# 文件上传配置（url-prefix 相对路径 /uploads/，dev 由 Vite 代理、prod 由 Nginx 映射）
+upload:
+  path: ${UPLOAD_PATH:./uploads/}
+  url-prefix: ${UPLOAD_URL_PREFIX:/uploads/}
+
+# Actuator：仅暴露健康检查与基础信息，供容器 healthcheck / 负载均衡探活
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    com.xust.secondhand: ${LOG_LEVEL:info}

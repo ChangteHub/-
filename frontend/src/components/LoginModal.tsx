@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Modal, Input, Button, Toast } from 'antd-mobile'
 import { EyeOutline, EyeInvisibleOutline } from 'antd-mobile-icons'
-import { useStore } from '../store/useStore'
+import { useStore } from '../stores/useStore'
 import { authApi } from '../services/api'
 import './LoginModal.css'
 

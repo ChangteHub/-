@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { LeftOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
 import type { ImageUploadItem } from 'antd-mobile/es/components/image-uploader'
 import { commonApi, verificationApi } from '../../services/api'
-import { useStore } from '../../store/useStore'
+import { useStore } from '../../stores/useStore'
 import './Verification.css'
 
 export default function VerificationPage() {

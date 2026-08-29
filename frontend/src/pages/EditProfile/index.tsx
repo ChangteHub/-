@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { NavBar, Input, TextArea, Button, Toast, Image } from 'antd-mobile'
 import { LeftOutline } from 'antd-mobile-icons'
 import { userApi, commonApi } from '../../services/api'
-import { useStore } from '../../store/useStore'
+import { useStore } from '../../stores/useStore'
 import { DEFAULT_AVATAR } from '../../utils/format'
 import './EditProfile.css'
 

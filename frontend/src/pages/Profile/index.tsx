@@ -11,7 +11,7 @@ import {
   RightOutlined,
   DashboardOutlined,
 } from '@ant-design/icons'
-import { useStore } from '../../store/useStore'
+import { useStore } from '../../stores/useStore'
 import { productApi } from '../../services/api'
 import ProductCard from '../../components/ProductCard'
 import { avatarFallback, DEFAULT_AVATAR } from '../../utils/format'

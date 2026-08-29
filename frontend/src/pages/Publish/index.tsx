@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Input, TextArea, Picker, Button, Toast, Image } from 'antd-mobile'
 import { CloseOutline, LeftOutline } from 'antd-mobile-icons'
 import { productApi, commonApi } from '../../services/api'
-import { useStore } from '../../store/useStore'
+import { useStore } from '../../stores/useStore'
 import type { Category } from '../../types'
 import './Publish.css'
 
