@@ -1,0 +1,7 @@
+commit_regex='^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?!?: .+'
+error_msg="提交信息不符合 Conventional Commits 规范，示例：feat: 添加学生管理功能 / fix(auth): 修复登录空指针"
+
+if ! grep -qE "$commit_regex" "$1"; then
+  echo "$error_msg" >&2
+  exit 1
+fi

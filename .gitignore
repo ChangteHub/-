@@ -57,3 +57,6 @@ test-results/
 reasonix.toml
 .claude/
 .file-versions/
+
+# ===== 测试证据（Artifact Policy：归属 CI Artifacts）=====
+gui-test-screenshots/

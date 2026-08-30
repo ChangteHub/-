@@ -1,0 +1,26 @@
+{
+  "name": "secondhand-platform",
+  "private": true,
+  "version": "2.0.0",
+  "description": "校园二手交易平台 — 工程化根配置（git hooks / 前端 lint 工具链；业务代码见 frontend/ 与 backend/）",
+  "scripts": {
+    "prepare": "husky",
+    "lint": "eslint frontend/src",
+    "lint:fix": "eslint frontend/src --fix"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.{ts,tsx}": [
+      "eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}
