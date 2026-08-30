@@ -51,3 +51,9 @@ backend/uploads/
 .reasonix/
 reasonix.toml
 test-results/
+
+# ===== 工具缓存 =====
+.reasonix/
+reasonix.toml
+.claude/
+.file-versions/
