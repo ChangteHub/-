@@ -65,7 +65,7 @@ export default function PublishPage() {
       if (res?.url) {
         setImages([...images, res.url])
       }
-    } catch (error) {
+    } catch {
       Toast.show({ content: '图片上传失败', position: 'center' })
     } finally {
       setUploading(false)
@@ -120,7 +120,7 @@ export default function PublishPage() {
       })
       Toast.show({ content: '发布成功', position: 'center' })
       setTimeout(() => navigate('/'), 800)
-    } catch (error) {
+    } catch {
       Toast.show({ content: '发布失败', position: 'center' })
     } finally {
       setSubmitting(false)

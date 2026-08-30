@@ -40,7 +40,7 @@ export default function EditProfilePage() {
       if (res?.url) {
         setAvatar(res.url)
       }
-    } catch (error) {
+    } catch {
       Toast.show({ content: '头像上传失败', position: 'center' })
     } finally {
       setUploading(false)
@@ -64,7 +64,7 @@ export default function EditProfilePage() {
       await checkAuth()
       Toast.show({ content: '保存成功', position: 'center' })
       setTimeout(() => navigate(-1), 800)
-    } catch (error) {
+    } catch {
       Toast.show({ content: '保存失败', position: 'center' })
     } finally {
       setSubmitting(false)

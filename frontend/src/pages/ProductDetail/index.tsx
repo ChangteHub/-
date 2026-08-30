@@ -52,7 +52,7 @@ export default function ProductDetailPage() {
     try {
       const res: any = await favoriteApi.check(id!)
       setIsFavorite(res === true)
-    } catch (error) {
+    } catch {
       // 未登录时忽略
     }
   }
@@ -71,7 +71,7 @@ export default function ProductDetailPage() {
       if (res?.id) {
         navigate(`/chat/${res.id}`)
       }
-    } catch (error) {
+    } catch {
       Toast.show({ content: '创建会话失败', position: 'center' })
     }
   }
@@ -97,7 +97,7 @@ export default function ProductDetailPage() {
         void heartRef.current.offsetWidth
         heartRef.current.classList.add('heartbeat')
       }
-    } catch (error) {
+    } catch {
       Toast.show({ content: '操作失败', position: 'center' })
     }
   }, [isFavorite, product])

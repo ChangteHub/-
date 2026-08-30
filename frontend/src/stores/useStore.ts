@@ -155,7 +155,7 @@ export const useStore = create<AppState>((set, get) => ({
         // getMe 返回空（用户被删/异常）：与其他分支一致清空内存态
         set({ authChecked: true, user: null, favorites: [], browsingHistory: [] })
       }
-    } catch (error) {
+    } catch {
       // token 失效：清理凭证与内存态，完成检查
       localStorage.removeItem('token')
       set({ authChecked: true, user: null, favorites: [], browsingHistory: [] })

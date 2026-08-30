@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SearchOutline, BellOutline } from 'antd-mobile-icons'
-import { Swiper, Grid, DotLoading, Toast } from 'antd-mobile'
+import { Swiper, Grid, DotLoading} from 'antd-mobile'
 import {
   BookOutlined,
   MobileOutlined,
