@@ -6,14 +6,14 @@
 #       本地: git bundle create p1.bundle main && scp p1.bundle root@服务器:/tmp/
 #       服务器: git fetch /tmp/p1.bundle main && git reset --hard FETCH_HEAD && bash deploy.sh）
 set -euo pipefail
-cd "$(dirname "$0")"
+cd "${SECONDHAND_DIR:-/opt/secondhand}"
 
 OLD=$(git rev-parse HEAD)
 echo "当前版本: $(git log --oneline -1)"
 
 ok=0
 for i in 1 2 3; do
-  if git fetch origin main 2>/dev/null; then ok=1; break; fi
+  if timeout 40 git fetch origin main 2>/dev/null; then ok=1; break; fi
   echo "GitHub 连接失败（第 $i/3 次），5 秒后重试..."
   sleep 5
 done
