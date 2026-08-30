@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Toast, Dialog } from 'antd-mobile'
 import { adminApi } from '../../services/api'
+import { USER_STATUS } from '../../constants'
 import { formatDate, DEFAULT_AVATAR } from '../../utils/format'
 import './UserManagement.css'
 
@@ -171,9 +172,9 @@ export default function UserManagement() {
                   <td>{user.productCount}</td>
                   <td>
                     <span
-                      className={`status-tag ${user.status === 0 ? 'status-active' : 'status-disabled'}`}
+                      className={`status-tag ${USER_STATUS[user.status]?.className || ''}`}
                     >
-                      {user.status === 0 ? '正常' : '已禁用'}
+                      {USER_STATUS[user.status]?.label || '未知'}
                     </span>
                   </td>
                   <td>

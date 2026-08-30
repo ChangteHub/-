@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Toast, Dialog } from 'antd-mobile'
 import { adminApi } from '../../services/api'
+import { CATEGORY_STATUS } from '../../constants'
 import './CategoryManagement.css'
 
 interface CategoryItem {
@@ -151,9 +152,9 @@ export default function CategoryManagement() {
                   <td>{category.sort}</td>
                   <td>
                     <span
-                      className={`status-tag ${category.status === 0 ? 'status-active' : 'status-disabled'}`}
+                      className={`status-tag ${CATEGORY_STATUS[category.status ?? 0]?.className || ''}`}
                     >
-                      {category.status === 0 ? '启用' : '禁用'}
+                      {CATEGORY_STATUS[category.status ?? 0]?.label || '未知'}
                     </span>
                   </td>
                   <td>

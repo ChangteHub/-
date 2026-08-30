@@ -4,6 +4,7 @@ import { Toast, Dialog } from 'antd-mobile'
 import { adminApi, categoryApi } from '../../services/api'
 import { formatDate, formatPrice, DEFAULT_PRODUCT_IMAGE } from '../../utils/format'
 import type { Category } from '../../types'
+import { PRODUCT_STATUS } from '../../constants'
 import './ProductManagement.css'
 
 interface ProductItem {
@@ -20,12 +21,6 @@ interface ProductItem {
   sellerUsername: string
   categoryName: string
   createdAt: string
-}
-
-const statusMap: Record<number, { label: string; className: string }> = {
-  0: { label: '在售', className: 'status-on-sale' },
-  1: { label: '已售', className: 'status-sold' },
-  2: { label: '已下架', className: 'status-off-shelf' },
 }
 
 export default function ProductManagement() {
@@ -254,9 +249,9 @@ export default function ProductManagement() {
                   <td>{product.viewCount}</td>
                   <td>
                     <span
-                      className={`status-tag ${statusMap[product.status]?.className || ''}`}
+                      className={`status-tag ${PRODUCT_STATUS[product.status]?.className || ''}`}
                     >
-                      {statusMap[product.status]?.label || '未知'}
+                      {PRODUCT_STATUS[product.status]?.label || '未知'}
                     </span>
                   </td>
                   <td>{formatDate(product.createdAt)}</td>

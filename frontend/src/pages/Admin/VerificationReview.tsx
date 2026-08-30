@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Toast } from 'antd-mobile'
 import { adminApi } from '../../services/api'
 import { formatDate } from '../../utils/format'
+import { VERIFICATION_STATUS } from '../../constants'
 import './VerificationReview.css'
 
 interface VerificationItem {
@@ -18,12 +19,6 @@ interface VerificationItem {
   status: number
   rejectReason: string
   createdAt: string
-}
-
-const statusMap: Record<number, { label: string; className: string }> = {
-  0: { label: '待审核', className: 'status-pending' },
-  1: { label: '已通过', className: 'status-approved' },
-  2: { label: '已拒绝', className: 'status-rejected' },
 }
 
 export default function VerificationReview() {
@@ -175,9 +170,9 @@ export default function VerificationReview() {
                   </td>
                   <td>
                     <span
-                      className={`status-tag ${statusMap[item.status]?.className || ''}`}
+                      className={`status-tag ${VERIFICATION_STATUS[item.status]?.className || ''}`}
                     >
-                      {statusMap[item.status]?.label || '未知'}
+                      {VERIFICATION_STATUS[item.status]?.label || '未知'}
                     </span>
                   </td>
                   <td>{formatDate(item.createdAt)}</td>

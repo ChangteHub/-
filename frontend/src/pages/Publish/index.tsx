@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { Input, TextArea, Picker, Button, Toast, Image } from 'antd-mobile'
 import { CloseOutline, LeftOutline } from 'antd-mobile-icons'
 import { productApi, commonApi } from '../../services/api'
+import { PRODUCT_CONDITIONS } from '../../constants'
 import { useStore } from '../../stores/useStore'
 import type { Category } from '../../types'
 import './Publish.css'
 
-const conditionOptions = ['全新', '九成新', '八成新', '七成新及以下'].map((v) => ({
+const conditionOptions = PRODUCT_CONDITIONS.map((v) => ({
   label: v,
   value: v,
 }))
