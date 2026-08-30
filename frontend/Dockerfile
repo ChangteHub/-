@@ -3,7 +3,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+# 国内构建加速：npmmirror 镜像（仅容器内构建生效）
+RUN npm config set registry https://registry.npmmirror.com && npm ci
 
 COPY . .
 RUN npm run build

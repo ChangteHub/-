@@ -4,6 +4,8 @@ WORKDIR /app
 
 # 先复制 pom.xml，利用 Docker 缓存依赖
 COPY pom.xml .
+# 国内构建加速：阿里云 Maven 镜像（本地/CI 构建同样可用）
+COPY settings-aliyun.xml /root/.m2/settings.xml
 RUN mvn dependency:go-offline -B
 
 # 复制源码并打包
