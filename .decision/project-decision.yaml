@@ -1,0 +1,39 @@
+decision_id: FS-2026-001
+revision: 2
+status: confirmed
+scope: L3
+project_mode: refactor
+
+frontend:
+  mode: a
+  ux_surface:
+    user_web_mobile: true
+    user_web_desktop: false
+    admin_mobile: false
+    admin_desktop: true
+
+backend:
+  architecture: monolith
+  framework: spring-boot
+
+database:
+  engine: mysql
+  migration: flyway
+
+auth:
+  enabled: true
+  strategy: jwt
+
+advanced:
+  redis: false
+  mq: false
+  elasticsearch: false
+  kubernetes: false
+
+deployment:
+  target: local
+  runtime: docker-compose
+  proxy: nginx
+
+ci:
+  enabled: true

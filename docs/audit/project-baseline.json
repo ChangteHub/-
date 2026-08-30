@@ -1,0 +1,51 @@
+{
+  "artifact": "PROJECT BASELINE",
+  "generated_at": "2026-08-30T13:08:45",
+  "project_root": "C:\\Users\\EN\\Desktop\\project1",
+  "facts": {
+    "Repository Shape": {
+      "前端工程": "frontend",
+      "后端工程": "backend",
+      "仓库形态": "单仓库(frontend+backend)"
+    },
+    "Frontend Stack": {
+      "框架": "react 18.3.1",
+      "构建": "vite",
+      "UI": "antd-mobile",
+      "状态管理": "zustand",
+      "锁文件": "package-lock.json",
+      "src 目录": "components, constants, hooks, pages, router, services, stores, types, utils"
+    },
+    "Backend Stack": {
+      "构建": "Maven (pom.xml)",
+      "Java": "21",
+      "Spring Boot": "3.2.5",
+      "ORM": "MyBatis-Plus",
+      "组件": "Spring Security, JWT, WebSocket, Actuator, API 文档",
+      "后端分层包": "common, config, controller, dto, entity, exception, repository, security, service"
+    },
+    "Database": {
+      "迁移目录": "backend\\src\\main\\resources\\db\\migration",
+      "Flyway": "是"
+    },
+    "Runtime": {
+      "Dockerfile": "backend\\Dockerfile, frontend\\Dockerfile",
+      "Compose": "docker-compose.yml",
+      "Nginx": "frontend\\nginx.conf"
+    },
+    "CI-CD": {
+      "GitHub Actions": "ci.yml"
+    },
+    "Observability": {
+      "健康检查": "Spring Actuator"
+    },
+    "Git Status": {
+      "分支": "main",
+      "未提交变更": "16 项",
+      ".env": "未跟踪"
+    }
+  },
+  "risks": [],
+  "open_questions": [],
+  "unknowns": []
+}

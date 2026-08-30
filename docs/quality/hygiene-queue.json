@@ -1,0 +1,13 @@
+{
+  "updated_at": "2026-08-30",
+  "items": [
+    {
+      "path": "g",
+      "severity": "WARN",
+      "reason": "[Artifact Policy] root/gui-test-screenshots/（7 个文件, 最后修改 2026-08-30）",
+      "first_seen": "2026-08-30",
+      "status": "pending",
+      "detail": "[Artifact Policy] root/gui-test-screenshots/（7 个文件, 最后修改 2026-08-30）——测试证据应归属 CI Artifacts 或临时目录；建议 .gitignore 或移出仓库"
+    }
+  ]
+}

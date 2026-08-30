@@ -33,4 +33,4 @@ Assumptions:
 - 本轮不引入新依赖（不加 MapStruct/Testcontainers 等），仅结构与文档补齐
 - WebSocket 验证依赖本地 compose 栈（当前 healthy），结果仅代表 dev 环境
 
-Status: CONFIRMED（#8 项为待用户决定项，不阻塞其余执行）
+Status: CONFIRMED
